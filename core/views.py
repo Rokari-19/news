@@ -23,7 +23,7 @@ class TagSearchView(ListAPIView):
     search_fields = ['tag_name']
 
 class CreateTagView(GenericAPIView):
-    serializer_class = CreateTagSSerializer
+    serializer_class = CreateTagSerializer
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -36,13 +36,13 @@ class CreateNewsItemView(GenericAPIView):
     serializer_class = CreateNewsItemSerializer
     
     def post(self, request):
-        serializer = self.seriallizer_class(data=request.data)
+        serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status.HTTP_201_CREATED)
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
     
-class LlistNewsItemView(ListAPIView):
+class ListNewsItemView(ListAPIView):
     serializer_class = NewsItemSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = NewsItemFilter
@@ -50,3 +50,9 @@ class LlistNewsItemView(ListAPIView):
     def get_queryset(self):
         return NewsItem.objects.all()
     
+class NewsItemDetailView(RetrieveAPIView):
+    serializer_class = NewsItemSerializer
+    lookup_field = 'id'
+    
+    def get_queryset(self):
+        return NewsItem.objects.all()
