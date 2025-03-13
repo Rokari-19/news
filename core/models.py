@@ -24,7 +24,7 @@ class Tag(models.Model):
 class NewsItem(models.Model):
     id = models.CharField(max_length=15, primary_key=True, editable=False)
     title = models.CharField(max_length=100)
-    content = models.TextField(blank=False, null=False, max_length=1200)
+    content = models.TextField(blank=False, null=False, max_length=35000)
     created = models.DateTimeField(auto_now_add=True)
     tag = models.ManyToManyField(Tag, related_name='news_items')
     likes = models.BigIntegerField(default=0)
