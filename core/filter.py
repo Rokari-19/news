@@ -23,7 +23,7 @@ class NewsItemFilter(filters.FilterSet):
         fields = {
             'title': ['icontains'],
             'content': ['icontains'],
-            'tag': ['exact'],
+            'tag__tag_name': ['exact'],
             'created': ['exact']
         }
         

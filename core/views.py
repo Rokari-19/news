@@ -1,5 +1,6 @@
 from rest_framework.generics import *
 from rest_framework.response import Response
+from rest_framework.pagination import PageNumberPagination
 from rest_framework import status
 from .serializers import *
 from .models import *
@@ -19,7 +20,7 @@ class ListTagView(ListAPIView):
 class TagSearchView(ListAPIView):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
-    filter_backends = [DjangoFilterBackend, SearchFilter]
+    filter_backends = [SearchFilter]
     search_fields = ['tag_name']
 
 class CreateTagView(GenericAPIView):
@@ -46,6 +47,7 @@ class ListNewsItemView(ListAPIView):
     serializer_class = NewsItemSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_class = NewsItemFilter
+    pagination_class = PageNumberPagination
     
     def get_queryset(self):
         return NewsItem.objects.all()
@@ -54,4 +56,26 @@ class NewsItemDetailView(RetrieveDestroyAPIView):
     queryset = NewsItem.objects.all()
     serializer_class = NewsItemSerializer
     lookup_field = 'id'
+    
+class NewsSearchView(ListAPIView):
+    queryset = NewsItem.objects.all()
+    serializer_class = NewsItemSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['title', 'content', 'tag__tag_name']
             
+
+
+class LikeNewsItemView(UpdateAPIView):
+    def post(self, request, id):
+        news_item = get_object_or_404(NewsItem, id=id)
+        news_item.likes += 1
+        news_item.save()
+        return Response({"message": "Liked successfully", "like_count": news_item.likes}, status=status.HTTP_200_OK)
+
+
+class DislikeNewsItemView(UpdateAPIView):
+    def post(self, request, id):
+        news_item = get_object_or_404(NewsItem, id=id)
+        news_item.dislikes += 1
+        news_item.save()
+        return Response({"message": "Disliked successfully", "dislike_count": news_item.dislikes}, status=status.HTTP_200_OK)

@@ -18,7 +18,7 @@ class Tag(models.Model):
         super().save(*args, **kwargs)
     
     def __str__(self):
-        return f"{self.tag_name} - {self.tag_id}"
+        return f"{self.tag_name}"
     
 
 class NewsItem(models.Model):
@@ -27,9 +27,11 @@ class NewsItem(models.Model):
     content = models.TextField(blank=False, null=False, max_length=1200)
     created = models.DateTimeField(auto_now_add=True)
     tag = models.ManyToManyField(Tag, related_name='news_items')
+    likes = models.BigIntegerField(default=0)
+    dislikes = models.BigIntegerField(default=0)
     
     def __str__(self):
-        return f"{self.title} - {self.id}"
+        return f"{self.title}"
     
     def save(self, *args, **kwargs):
         if not self.id:

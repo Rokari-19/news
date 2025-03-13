@@ -16,17 +16,24 @@ class CreateTagSerializer(serializers.ModelSerializer):
         return Tag.objects.create(**validated_data)
     
 class NewsItemSerializer(serializers.ModelSerializer):
+    tag = TagSerializer(many=True)
     class Meta:
         model = NewsItem
         fields = '__all__'
         
 class CreateNewsItemSerializer(serializers.ModelSerializer):
+    tag = serializers.ListField(child=serializers.CharField(), write_only=True)
+
     class Meta:
         model = NewsItem
         fields = ['title', 'content', 'tag']
-        
+
     def create(self, validated_data):
-        tags = validated_data.pop('tag', [])
+        tag_names = validated_data.pop('tag', [])
         news_item = NewsItem.objects.create(**validated_data)
+
+        # Fetch or create tags by name
+        tags = [Tag.objects.get_or_create(tag_name=tag_name)[0] for tag_name in tag_names]
         news_item.tag.set(tags)
+
         return news_item
