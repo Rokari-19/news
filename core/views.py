@@ -50,9 +50,8 @@ class ListNewsItemView(ListAPIView):
     def get_queryset(self):
         return NewsItem.objects.all()
     
-class NewsItemDetailView(RetrieveAPIView):
+class NewsItemDetailView(RetrieveDestroyAPIView):
+    queryset = NewsItem.objects.all()
     serializer_class = NewsItemSerializer
     lookup_field = 'id'
-    
-    def get_queryset(self):
-        return NewsItem.objects.all()
+            

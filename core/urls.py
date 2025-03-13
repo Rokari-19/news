@@ -8,7 +8,6 @@ urlpatterns = [
     # create endpoints
     path('news/create/', CreateNewsItemView.as_view()),
     path('tag/create/', CreateTagView.as_view()),
-    # get details endpoints
+    # get details/delete item endpoints
     path('news/get/<str:id>/', NewsItemDetailView.as_view()),
-    # delete endpoints
 ]
