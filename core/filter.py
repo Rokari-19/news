@@ -3,7 +3,10 @@ from .models import *
 import datetime
 
 class NewsItemFilter(filters.FilterSet):
-    created = filters.CharFilter(method='filter_by_date_created')
+    created = filters.DateFilter(field_name='created', lookup_expr='exact')
+    tag = filters.CharFilter(field_name='tag__tag_name', lookup_expr='iexact')
+    title = filters.CharFilter(field_name='title', lookup_expr='icontains')
+    content = filters.CharFilter(field_name='content', lookup_expr='icontains')
     def filter_by_date_created(self, queryset, name, value):
         try:
             # Parse the date string (YYYY-MM-DD)
@@ -20,12 +23,7 @@ class NewsItemFilter(filters.FilterSet):
             return queryset.none()
     class Meta:
         model = NewsItem
-        fields = {
-            'title': ['icontains'],
-            'content': ['icontains'],
-            'tag__tag_name': ['exact'],
-            'created': ['exact']
-        }
+        fields = ['title', 'content', 'tag', 'created']
         
 class TagFilter(filters.FilterSet):
     class Meta:
