@@ -6,7 +6,9 @@ from .serializers import *
 from .models import *
 from .filter import *
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.filters import SearchFilter
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 # Create your views here.
 
 class ListTagView(ListAPIView):
@@ -62,20 +64,70 @@ class NewsSearchView(ListAPIView):
     serializer_class = NewsItemSerializer
     filter_backends = [SearchFilter]
     search_fields = ['title', 'content', 'tag__tag_name']
-            
 
 
-class LikeNewsItemView(UpdateAPIView):
+class LikeNewsView(UpdateAPIView):
     def post(self, request, id):
         news_item = get_object_or_404(NewsItem, id=id)
         news_item.likes += 1
         news_item.save()
-        return Response({"message": "Liked successfully", "like_count": news_item.likes}, status=status.HTTP_200_OK)
 
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f'news_{id}',
+            {
+                'type': 'likes_dislikes_update',
+                'likes': news_item.likes,
+                'dislikes': news_item.dislikes,
+            }
+        )
 
-class DislikeNewsItemView(UpdateAPIView):
+        return Response({'likes': news_item.likes, 'dislikes': news_item.dislikes})
+
+class DislikeNewsView(UpdateAPIView):
     def post(self, request, id):
         news_item = get_object_or_404(NewsItem, id=id)
         news_item.dislikes += 1
         news_item.save()
-        return Response({"message": "Disliked successfully", "dislike_count": news_item.dislikes}, status=status.HTTP_200_OK)
+
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f'news_{id}',
+            {
+                'type': 'likes_dislikes_update',
+                'likes': news_item.likes,
+                'dislikes': news_item.dislikes,
+            }
+        )
+
+        return Response({'likes': news_item.likes, 'dislikes': news_item.dislikes})
+    
+    
+class AddComments(CreateAPIView):
+    queryset = Coments.objects.all()
+    serializer_class = CommentsSerializer
+
+    def perform_create(self, serializer):
+        news_item = get_object_or_404(NewsItem, id=self.kwargs['id'])
+        serializer.save(post=news_item)
+
+        channel_layer = get_channel_layer()
+        comments = Coments.objects.filter(post=news_item)
+        serialized_comments = CommentsSerializer(comments, many=True).data
+        id = self.kwargs['id']
+        async_to_sync(channel_layer.group_send)(
+            f'news_{id}',
+            {
+                'type': 'comment_added',
+                'comments': serialized_comments,
+            }
+        )
+    
+class GetComments(ListAPIView):
+    serializer_class = CommentsSerializer
+    queryset = Coments.objects.all()
+    lookup_field = 'id'
+    
+    def get_queryset(self):
+        return super().get_queryset().filter(post=self.kwargs.get('id'))
+    

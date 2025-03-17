@@ -42,3 +42,23 @@ class NewsItem(models.Model):
             self.id = data.replace("-","").replace("_", "")
         super().save(*args, **kwargs)
     
+    
+class Coments(models.Model):
+    class Meta:
+        verbose_name_plural = 'Comments'
+    id = models.CharField(max_length=15, primary_key=True, editable=False)
+    comment = models.TextField(max_length=35000, blank=False, null=False)
+    created = models.DateTimeField(auto_now_add=True)
+    post = models.ForeignKey(NewsItem, on_delete=models.CASCADE)
+    
+    def __str__(self):
+        return f'{self.id}'
+    
+    def save(self, *args, **kwargs):
+        if not self.id:
+            # Generate a shorter base64-encoded UUID
+            hex_string = uuid.uuid4().hex
+            bytes_data = bytes.fromhex(hex_string)
+            data = base64.urlsafe_b64encode(bytes_data).decode('ascii')[:12]
+            self.id = data.replace("-","").replace("_", "")
+        super().save(*args, **kwargs)

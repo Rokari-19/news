@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import NewsItem, Tag
+from .models import NewsItem, Tag, Coments
 
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
@@ -37,3 +37,10 @@ class CreateNewsItemSerializer(serializers.ModelSerializer):
         news_item.tag.set(tags)
 
         return news_item
+
+class CommentsSerializer(serializers.ModelSerializer):
+    post = NewsItemSerializer
+    
+    class Meta:
+        model = Coments
+        fields = '__all__'

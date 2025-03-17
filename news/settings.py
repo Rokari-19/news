@@ -12,7 +12,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-m%i^29do$$uftudes2ccpgknq2xj$k))+2%q9em73q@apbafvx'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'news-ghvj.onrender.com',]
 CORS_ALLOW_ALL_ORIGINS = True
@@ -25,9 +25,11 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'daphne',
     'django.contrib.staticfiles',
-    # rest apps
+    # rest/websocket apps
     'rest_framework',
+    'channels',
     'rest_framework.authtoken',
     'corsheaders',
     'django_filters',
@@ -78,17 +80,27 @@ TEMPLATES = [
 WSGI_APPLICATION = 'news.wsgi.application'
 ASGI_APPLICATION = 'news.asgi.application'
 
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND':'channels.layers.InMemoryChannelLayer'
+    }
+}
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
+# DATABASES = {
+#     'default' : dj_database_url.config(
+#         default='postgresql://newsapp_jkc3_user:G9CcP7E7VXJ4MbhYTxYdUUhsLMbhtQsl@dpg-cv9l8dbqf0us73c97jt0-a.oregon-postgres.render.com/newsapp_jkc3',
+#         conn_max_age=600
+#     )
+# }
 DATABASES = {
-    'default' : dj_database_url.config(
-        default='postgresql://newsapp_jkc3_user:G9CcP7E7VXJ4MbhYTxYdUUhsLMbhtQsl@dpg-cv9l8dbqf0us73c97jt0-a.oregon-postgres.render.com/newsapp_jkc3',
-        conn_max_age=600
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
